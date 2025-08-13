@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rave Text Visual</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Dancing+Script:wght@700&family=Courier+Prime:wght@700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background-color 0.05s ease;
+        }
+        
+        body.inverted {
+            background: #fff;
+        }
+        
+        .main-display {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #flashingText {
+            font-weight: bold;
+            transition: color 0.05s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 90%;
+            line-height: 1.2;
+        }
+        
+        body.inverted #flashingText {
+            color: #000;
+        }
+        
+        .control-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            width: 320px;
+            background: #000;
+            border-left: 1px solid #fff;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            z-index: 1000;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .control-panel.collapsed {
+            transform: translateX(calc(100% - 50px));
+        }
+        
+        .toggle-panel {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 80px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 0;
+            transition: background 0.3s ease;
+        }
+        
+        .toggle-panel:hover {
+            background: #000;
+            border: 1px solid #fff;
+        }
+        
+        .toggle-panel svg {
+            width: 24px;
+            height: 24px;
+            fill: #000;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-panel:hover svg {
+            fill: #fff;
+        }
+        
+        .control-panel.collapsed .toggle-panel svg {
+            transform: rotate(180deg);
+        }
+        
+        .panel-content {
+            padding: 30px 20px;
+            margin-left: 50px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            color: #fff;
+            letter-spacing: 0.3em;
+            font-weight: normal;
+            text-transform: uppercase;
+        }
+        
+        .controls {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        label {
+            font-weight: normal;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #fff;
+        }
+        
+        input[type="text"],
+        select {
+            padding: 10px;
+            border: 1px solid #fff;
+            border-radius: 0;
+            background: #000;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            background: #fff;
+            color: #000;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 2px;
+            background: #fff;
+            border-radius: 0;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #000;
+            border: 1px solid #fff;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #000;
+            border: 1px solid #fff;
+        }
+        
+        .range-value {
+            font-size: 0.8rem;
+            color: #fff;
+            font-weight: normal;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: 1px solid #fff;
+            border-radius: 0;
+            font-size: 14px;
+            font-weight: normal;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #startBtn {
+            background: #fff;
+            color: #000;
+        }
+        
+        #startBtn:hover {
+            background: #000;
+            color: #fff;
+        }
+        
+        #stopBtn {
+            background: #000;
+            color: #fff;
+        }
+        
+        #stopBtn:hover {
+            background: #fff;
+            color: #000;
+        }
+        
+        .font-impact {
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        }
+        
+        .font-gothic {
+            font-family: 'UnifrakturMaguntia', cursive;
+        }
+        
+        .font-cursive {
+            font-family: 'Dancing Script', cursive;
+        }
+        
+        .font-mono {
+            font-family: 'Courier Prime', 'Courier New', monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .control-panel {
+                width: 280px;
+            }
+            
+            .panel-content {
+                padding: 20px 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .control-panel {
+                width: 100%;
+                height: auto;
+                top: auto;
+                bottom: 0;
+                transform: translateY(0);
+            }
+            
+            .control-panel.collapsed {
+                transform: translateY(calc(100% - 50px));
+            }
+            
+            .toggle-panel {
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 80px;
+                height: 50px;
+                border-radius: 10px 10px 0 0;
+            }
+            
+            .control-panel.collapsed .toggle-panel svg {
+                transform: rotate(-90deg);
+            }
+            
+            .panel-content {
+                margin-left: 0;
+                margin-top: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-display">
+        <div id="flashingText" class="font-impact">RAVE MODE!</div>
+    </div>
+    
+    <div class="control-panel" id="controlPanel">
+        <div class="toggle-panel" onclick="togglePanel()">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+            </svg>
+        </div>
+        
+        <div class="panel-content">
+            <h1>CONTROLS</h1>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="textInput">Enter Your Text</label>
+                    <input type="text" id="textInput" placeholder="Type your message..." value="RAVE MODE!">
+                </div>
+                
+                <div class="control-group">
+                    <label for="fontSelect">Choose Font</label>
+                    <select id="fontSelect">
+                        <option value="impact">Impact</option>
+                        <option value="gothic">Gothic</option>
+                        <option value="cursive">Cursive</option>
+                        <option value="mono">Monospace</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="speedRange">Flash Speed: <span id="speedValue" class="range-value">200ms</span></label>
+                    <input type="range" id="speedRange" min="50" max="1000" value="200" step="10">
+                </div>
+                
+                <div class="control-group">
+                    <label for="sizeRange">Text Size: <span id="sizeValue" class="range-value">72px</span></label>
+                    <input type="range" id="sizeRange" min="20" max="200" value="72" step="2">
+                </div>
+                
+                <div class="button-group">
+                    <button id="startBtn">START RAVE</button>
+                    <button id="stopBtn">STOP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const body = document.body;
+        const flashingText = document.getElementById('flashingText');
+        const textInput = document.getElementById('textInput');
+        const fontSelect = document.getElementById('fontSelect');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const sizeRange = document.getElementById('sizeRange');
+        const sizeValue = document.getElementById('sizeValue');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const controlPanel = document.getElementById('controlPanel');
+        
+        let flashInterval = null;
+        let isInverted = false;
+        
+        // Toggle panel
+        function togglePanel() {
+            controlPanel.classList.toggle('collapsed');
+        }
+        
+        // Update text
+        textInput.addEventListener('input', (e) => {
+            flashingText.textContent = e.target.value || 'RAVE MODE!';
+        });
+        
+        // Update font
+        fontSelect.addEventListener('change', (e) => {
+            const fontClasses = {
+                'impact': 'font-impact',
+                'gothic': 'font-gothic',
+                'cursive': 'font-cursive',
+                'mono': 'font-mono'
+            };
+            flashingText.className = fontClasses[e.target.value] || 'font-impact';
+        });
+        
+        // Update speed display
+        speedRange.addEventListener('input', (e) => {
+            speedValue.textContent = e.target.value + 'ms';
+            if (flashInterval) {
+                stopFlashing();
+                startFlashing();
+            }
+        });
+        
+        // Update size
+        sizeRange.addEventListener('input', (e) => {
+            sizeValue.textContent = e.target.value + 'px';
+            flashingText.style.fontSize = e.target.value + 'px';
+        });
+        
+        // Start flashing
+        function startFlashing() {
+            stopFlashing(); // Clear any existing interval
+            const speed = parseInt(speedRange.value);
+            
+            flashInterval = setInterval(() => {
+                isInverted = !isInverted;
+                if (isInverted) {
+                    body.classList.add('inverted');
+                } else {
+                    body.classList.remove('inverted');
+                }
+            }, speed);
+        }
+        
+        // Stop flashing
+        function stopFlashing() {
+            if (flashInterval) {
+                clearInterval(flashInterval);
+                flashInterval = null;
+                body.classList.remove('inverted');
+                isInverted = false;
+            }
+        }
+        
+        // Button event listeners
+        startBtn.addEventListener('click', startFlashing);
+        stopBtn.addEventListener('click', stopFlashing);
+        
+        // Initialize
+        flashingText.style.fontSize = sizeRange.value + 'px';
+        
+        // Keyboard shortcut for panel toggle
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                togglePanel();
+            }
+        });
+    </script>
+</body>
+</html>
